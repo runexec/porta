@@ -75,14 +75,16 @@
   (map constructor-string-to-params
        (constructor-strings object)))
 
-(defn constructor-to-fn [constructor]
+(defn- constructor-to-fn [constructor & [def-name]]
   (let [_ (:constructor constructor)
         args (:args constructor)
         types (distinct args)
-        lisp-name (-> (str "-" _)
-                      (string/replace #"\." "-")
-                      (string/lower-case)
-                      symbol)
+        lisp-name (if def-name 
+                    (symbol def-name)
+                    (-> (str "-" _)
+                        (string/replace #"\." "-")
+                        (string/lower-case)
+                        symbol))
         counts (loop [args args
                       counts {}]
                  (if-let [_ (first args)]
@@ -91,14 +93,16 @@
                      (count
                       (filter #(= % _) args)))
                    counts))
-        new-args (flatten
-                  (for [[-type -count] counts]
-                    (->> (map #(str -type %) 
-                              (range -count))
-                         (map #(string/replace % ":" ""))
-                         (map symbol))))]
-    `(defn ~lisp-name [~@new-args]
-       (~(symbol (str _ ".")) ~@new-args))))
+        new-args (for [[-type -count] counts]
+                   (->> (map #(str -type %) 
+                             (range -count))
+                        (map #(string/replace % ":" ""))
+                        (map #(string/replace % "." "-"))
+                        (map symbol)))]
+    (eval
+     `(fn ~lisp-name [~@(flatten new-args)]
+        (~(symbol (str _ ".")) ~@(flatten new-args))))))
+
                     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Methods
 
