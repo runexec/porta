@@ -71,10 +71,6 @@
                   (map symbol)
                   vec))}))
 
-(defn constructors [object]
-  (map constructor-string-to-params
-       (constructor-strings object)))
-
 (defn- constructor-to-fn [constructor & [def-name]]
   (let [_ (:constructor constructor)
         args (:args constructor)
@@ -101,8 +97,16 @@
                         (map symbol)))]
     (eval
      `(fn ~lisp-name [~@(flatten new-args)]
-        (~(symbol (str _ ".")) ~@(flatten new-args))))))
+         (~(symbol (str _ ".")) ~@(flatten new-args))))))
 
+(defn constructors [object]
+  (map constructor-string-to-params
+       (constructor-strings object)))
+
+(defn construct [object n-construct]
+  (constructor-to-fn
+   (nth (constructors object)
+        n-construct)))
                     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Methods
 
@@ -111,4 +115,5 @@
            :methods
            object)]
     (case-map m)))
+
 
