@@ -1,7 +1,38 @@
-porta
+Porta
 =====
 
-To be announced
+Porta is a Clojure utility that generates a Clojure abstraction
+for an existing Java Class.
+
+How?
+=====
+
+Porta's def-methods form retrieves all the methods for a Java
+Class and binds them to a lisp-case defn symbol.
+```object.doThisThing => (-do-this-thing object)```
+
+Porta's abstraction form retrieves all possible constructors
+from a Java Class and defines a multi-fn with a lisp-case symbol.
+```clojure
+porta.core> (eval (abstraction java.util.Random))
+#'porta.core/-java-util-random
+```
+
+Install
+=====
+
+```bash
+git clone https://github.com/runexec/porta
+cd porta; lein install
+```
+
+Add to your Clojure project
+```clojure
+[casing/casing "0.1.0-SNAPSHOT"]
+```
+
+Examples
+=====
 
 ```clojure
 ;; Make a Clojure abstraction of a Java Class
