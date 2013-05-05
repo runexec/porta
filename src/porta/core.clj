@@ -128,7 +128,8 @@
                                (list `(~(symbol
                                          (str c "."))
                                        ~@%)))
-                               arg-range)]
+                               arg-range)
+        multi-args (distinct multi-args)]
     `(defn ~s
        ~@multi-args)))
                     
