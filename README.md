@@ -4,6 +4,25 @@ porta
 To be announced
 
 ```clojure
+;; Make a Clojure abstraction of a Java Class
+porta.core> (eval (abstraction java.util.Random))
+#'porta.core/-java-util-random
+;; Bind the class instance
+porta.core> (def random (let [seed 10] (-java-util-random seed)))
+#'porta.core/random
+;; Define Clojure methods related to the Java class
+porta.core> (def-methods java.util.Random)
+(#'porta.core/-next-int #'porta.core/-wait #'porta.core/-next-gaussian #'porta.core/-set-seed #'porta.core/-next-long #'porta.core/-notify-all #'porta.core/-equals #'porta.core/-next-float #'porta.core/-get-class #'porta.core/-notify #'porta.core/-to-string #'porta.core/-next-boolean #'porta.core/-next-bytes #'porta.core/-next-double #'porta.core/-hash-code)
+;; Call (.nextInt java.util.Random)
+porta.core> (-next-int random)
+254270492
+porta.core> (-next-int random)
+-1408064384
+;; Call (.nextInt java.util.Random 10)
+porta.core> (-next-int random 10)
+7
+porta.core> (-next-int random 10)
+3
 porta.core> (clojure.pprint/pprint
 	     (abstraction java.util.Locale))
 (clojure.core/defn
@@ -44,4 +63,5 @@ porta.core>
 #<Locale english_US_JP>
 nil
 porta.core> 
+
 ```

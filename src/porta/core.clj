@@ -124,21 +124,40 @@
                             (str "arg" x)))
                          (range %))
                        (map count multi))
-        multi-args (map #(cons % 
-                               (list `(~(symbol
-                                         (str c "."))
-                                       ~@%)))
-                               arg-range)
+        multi-args (map #(cons % (list `(~(symbol
+                                           (str c "."))
+                                         ~@%)))
+                        arg-range)
         multi-args (distinct multi-args)]
-    `(defn ~s
-       ~@multi-args)))
+       `(defn ~s
+          ~@multi-args)))
+
                     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Methods
 
+(defn- method-to-fn [method]
+  (let [args (symbol "args")
+        object (symbol "object")]
+    (eval
+     `(defn ~(-> method first symbol)
+        [~object & ~args]
+        (if ~args
+          (apply 
+           #(.. ~object
+                (~(-> method second symbol) %))
+           ~args)
+          (.. ~object ~(-> method second symbol)))))))
+        
 (defn methods [object]
   (let [m (characteristic-names 
            :methods
-           object)]
-    (case-map m)))
+           object)
+        cm (case-map m)]
+    (zipmap
+     (map #(str "-" %)
+          (keys cm))
+     (vals cm))))
 
+(defn def-methods [object]
+  (map method-to-fn (methods object)))
 
