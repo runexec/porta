@@ -28,7 +28,7 @@ cd porta; lein install
 
 Add to your Clojure project
 ```clojure
-[casing/casing "0.1.0-SNAPSHOT"]
+[porta/porta "0.1.0-SNAPSHOT"]
 ```
 
 Examples
