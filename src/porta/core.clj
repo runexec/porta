@@ -107,6 +107,30 @@
   (constructor-to-fn
    (nth (constructors object)
         n-construct)))
+
+(defn abstraction [object]
+  (let [_ (constructors object)
+        c (-> _
+              first
+              :constructor)
+        s (-> (str "-" c)
+              (.replace "." "-")
+              string/lower-case
+              symbol)
+        multi (map :args _)
+        arg-range (map #(mapv
+                         (fn [x]
+                           (symbol
+                            (str "arg" x)))
+                         (range %))
+                       (map count multi))
+        multi-args (map #(cons % 
+                               (list `(~(symbol
+                                         (str c "."))
+                                       ~@%)))
+                               arg-range)]
+    `(defn ~s
+       ~@multi-args)))
                     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Methods
 

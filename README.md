@@ -4,6 +4,23 @@ porta
 To be announced
 
 ```clojure
+porta.core> (clojure.pprint/pprint
+	     (abstraction java.util.Locale))
+(clojure.core/defn
+ -java-util-locale
+ ([arg0] (java.util.Locale. arg0))
+ ([arg0 arg1] (java.util.Locale. arg0 arg1))
+ ([arg0 arg1 arg2] (java.util.Locale. arg0 arg1 arg2)))
+nil
+porta.core> (eval (abstraction java.util.Locale))
+#'porta.core/-java-util-locale
+porta.core> (-java-util-locale "ENGLISH")
+#<Locale english>
+porta.core> (-java-util-locale "ENGLISH" "US")
+#<Locale english_US>
+porta.core> (-java-util-locale "ENGLISH" "US" "JP")
+#<Locale english_US_JP>
+
 porta.core>
 (doseq [_ (constructors java.util.Locale)] 
   (println _))
