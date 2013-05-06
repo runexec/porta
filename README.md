@@ -26,7 +26,7 @@ git clone https://github.com/runexec/porta
 cd porta; lein install
 ```
 
-Add to your Clojure project and import '''porta.core'''
+Add to your Clojure project and import ```porta.core```
 ```clojure
 [porta/porta "0.1.0-SNAPSHOT"]
 ```
