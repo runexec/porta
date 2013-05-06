@@ -3,6 +3,8 @@
   (:require [clojure.string :as string])
   (:refer-clojure :exclude [bean]))
 
+(def ^:dynamic *def-space* (ns porta.core))
+
 (defn bean [object]
   (let [_ (clojure.core/bean object)
         k (keys _)
@@ -59,35 +61,7 @@
                           (nnext dropping)))))]
       {:pre `(every? true? ~assertions)}))
 
-
-(defn build-restraints [object num-of-args]
-  (let [coll-args (map :args (constructors object))
-        to-build (group-by :count
-                           (map #(assoc {}
-                                   :count (count %)
-                                   :args %)
-                                coll-args))
-        get-restraints (fn [n]
-                         (apply merge-with
-                                #(list %1 %2)
-                                (map restraints
-                                     (map :args
-                                          (get to-build n)))))
-        restraints (get-restraints num-of-args)
-        msg "Input Restraints"]
-
-    (if-not (<= 2 (-> to-build
-                     (get num-of-args)
-                     count))
-      `(assert ~(:pre restraints) ~msg)
-      (let [_ (:pre restraints)]
-          ;; (some identity *) == (applyr or *) work around
-        `(assert
-          (some identity ~(vec _))
-          ~msg)))))
-                
-
-
+               
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Constructors
 
 (defn- constructor-strings [object]
@@ -146,6 +120,32 @@
   (constructor-to-fn
    (nth (constructors object)
         n-construct)))
+
+(defn build-restraints [object num-of-args]
+  (let [coll-args (map :args (constructors object))
+        to-build (group-by :count
+                           (map #(assoc {}
+                                   :count (count %)
+                                   :args %)
+                                coll-args))
+        get-restraints (fn [n]
+                         (apply merge-with
+                                #(list %1 %2)
+                                (map restraints
+                                     (map :args
+                                          (get to-build n)))))
+        restraints (get-restraints num-of-args)
+        msg "Input Restraints"]
+
+    (if-not (<= 2 (-> to-build
+                     (get num-of-args)
+                     count))
+      `(assert ~(:pre restraints) ~msg)
+      (let [_ (:pre restraints)]
+          ;; (some identity *) == (applyr or *) work around
+        `(assert
+          (some identity ~(vec _))
+          ~msg)))))
 
 (defn abstraction [object]
   (let [_ (constructors object)
