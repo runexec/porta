@@ -18,6 +18,16 @@ porta.core> (eval (abstraction java.util.Random))
 #'porta.core/-java-util-random
 ```
 
+Fields are treated the same after calling the def-fields form.
+```clojure
+porta.core> (take 3 (def-fields java.text.SimpleDateFormat))
+(#'porta.core/-month-field #'porta.core/-millisecond-field #'porta.core/-day-of-year-field)
+porta.core> -day-of-year-field
+10
+porta.core> -month-field
+2
+```
+
 Install
 =====
 
@@ -109,7 +119,40 @@ porta.core> (-get-date-format-symbols sdf)
 porta.core> (-to-pattern sdf)
 "h:mm:a"
 
+porta.core> (take 3 (def-fields java.text.SimpleDateFormat))
+(#'porta.core/-month-field #'porta.core/-millisecond-field #'porta.core/-day-of-year-field)
+porta.core> -day-of-year-field
+10
+porta.core> -month-field
+2
+
 ;; Building Blocks
+porta.core> (clojure.pprint/pprint
+	     (fields java.text.SimpleDateFormat))
+{"-month-field" "MONTH_FIELD",
+ "-millisecond-field" "MILLISECOND_FIELD",
+ "-day-of-year-field" "DAY_OF_YEAR_FIELD",
+ "-medium" "MEDIUM",
+ "-week-of-month-field" "WEEK_OF_MONTH_FIELD",
+ "-day-of-week-in-month-field" "DAY_OF_WEEK_IN_MONTH_FIELD",
+ "-date-field" "DATE_FIELD",
+ "-long" "LONG",
+ "-hour0-field" "HOUR0_FIELD",
+ "-hour1-field" "HOUR1_FIELD",
+ "-minute-field" "MINUTE_FIELD",
+ "-second-field" "SECOND_FIELD",
+ "-short" "SHORT",
+ "-timezone-field" "TIMEZONE_FIELD",
+ "-default" "DEFAULT",
+ "-era-field" "ERA_FIELD",
+ "-week-of-year-field" "WEEK_OF_YEAR_FIELD",
+ "-year-field" "YEAR_FIELD",
+ "-day-of-week-field" "DAY_OF_WEEK_FIELD",
+ "-hour-of-day0-field" "HOUR_OF_DAY0_FIELD",
+ "-full" "FULL",
+ "-hour-of-day1-field" "HOUR_OF_DAY1_FIELD",
+ "-am-pm-field" "AM_PM_FIELD"}
+nil
 porta.core> (clojure.pprint/pprint (methods java.text.SimpleDateFormat))
 {"-get-date-format-symbols" "getDateFormatSymbols",
  "-is-lenient" "isLenient",

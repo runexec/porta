@@ -39,17 +39,6 @@
        ((keyword k)
         (bean object))))
 
-(defn fields [object] 
-  (let [f (characteristic-names 
-           :fields
-           object)]
-    (-> (map #(-> %
-                  (string/lower-case)
-                  (.replace "_" "-")
-                  keyword)
-             f)
-        (zipmap f))))
-
 (defn restraints [coll-types]
   (let [args (interleave
               coll-types
@@ -233,3 +222,35 @@
 
 (defn def-methods [object]
   (map method-to-fn (methods object)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Fields
+
+(defn fields [object] 
+  (let [f (characteristic-names 
+           :fields
+           object)]
+    (-> (map #(str "-" %)
+             (map #(-> %
+                       (string/lower-case)
+                       (.replace "_" "-")
+                       casing)
+                  f))
+        (zipmap f))))
+
+(defn- field-to-def [field]
+  (eval
+   `(def ~(-> (first field) symbol)
+      ~(-> field last symbol))))
+
+(defn def-fields [object]
+  (let [_ (fields object)
+        [k v] [(keys _) (vals _)]
+        -symbol (-> object
+                    str
+                    (string/replace #"class " ""))]
+        
+  (map field-to-def
+       (zipmap k
+               (map #(str -symbol "/" %) v)))))
+               
+  
