@@ -31,6 +31,8 @@ Add to your Clojure project and ```(use porta.core)```
 [porta/porta "0.1.0-SNAPSHOT"]
 ```
 
+If you don't have the casing dependency, check this out https://github.com/runexec/casing
+
 Examples
 =====
 
