@@ -108,6 +108,41 @@ porta.core> (-to-pattern sdf)
 "h:mm:a"
 
 ;; Building Blocks
+porta.core> (clojure.pprint/pprint (methods java.text.SimpleDateFormat))
+{"-get-date-format-symbols" "getDateFormatSymbols",
+ "-is-lenient" "isLenient",
+ "-get-calendar" "getCalendar",
+ "-set2-digit-year-start" "set2DigitYearStart",
+ "-wait" "wait",
+ "-set-number-format" "setNumberFormat",
+ "-apply-pattern" "applyPattern",
+ "-format" "format",
+ "-parse-object" "parseObject",
+ "-parse" "parse",
+ "-get-time-zone" "getTimeZone",
+ "-notify-all" "notifyAll",
+ "-to-pattern" "toPattern",
+ "-set-date-format-symbols" "setDateFormatSymbols",
+ "-equals" "equals",
+ "-get-date-instance" "getDateInstance",
+ "-clone" "clone",
+ "-get-time-instance" "getTimeInstance",
+ "-get-available-locales" "getAvailableLocales",
+ "-apply-localized-pattern" "applyLocalizedPattern",
+ "-get-class" "getClass",
+ "-set-time-zone" "setTimeZone",
+ "-set-calendar" "setCalendar",
+ "-notify" "notify",
+ "-to-string" "toString",
+ "-get2-digit-year-start" "get2DigitYearStart",
+ "-get-number-format" "getNumberFormat",
+ "-to-localized-pattern" "toLocalizedPattern",
+ "-get-instance" "getInstance",
+ "-get-date-time-instance" "getDateTimeInstance",
+ "-format-to-character-iterator" "formatToCharacterIterator",
+ "-hash-code" "hashCode",
+ "-set-lenient" "setLenient"}```
+nil
 porta.core>
 (doseq [_ (constructors java.util.Locale)] 
   (println _))
@@ -132,4 +167,3 @@ porta.core>
 nil
 porta.core> 
 
-```
