@@ -126,6 +126,9 @@ porta.core> -day-of-year-field
 porta.core> -month-field
 2
 
+;; call def-all = def-methods, def-fields, (evail (abstraction object))
+(def-all java.text.SimpleDateFormat)
+
 ;; Building Blocks
 porta.core> (clojure.pprint/pprint
 	     (fields java.text.SimpleDateFormat))
@@ -153,7 +156,7 @@ porta.core> (clojure.pprint/pprint
  "-hour-of-day1-field" "HOUR_OF_DAY1_FIELD",
  "-am-pm-field" "AM_PM_FIELD"}
 nil
-porta.core> (clojure.pprint/pprint (methods java.text.SimpleDateFormat))
+porta.core> (clojure.pprint/pprint (-methods java.text.SimpleDateFormat))
 {"-get-date-format-symbols" "getDateFormatSymbols",
  "-is-lenient" "isLenient",
  "-get-calendar" "getCalendar",

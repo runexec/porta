@@ -1,14 +1,10 @@
 (ns porta.core
   (:use [casing.core])
-  (:require [clojure.string :as string])
-  (:refer-clojure :exclude [bean]))
+  (:require [clojure.string :as string]))
 
-(def ^:dynamic *def-space* (ns porta.core))
-
-(defn bean [object]
+(defn -bean [object]
   (let [_ (clojure.core/bean object)
-        k (keys _)
-        v (vals _)
+        [k v] [(keys _) (vals _)]
         k-as-str #(->> %
                        str
                        rest
@@ -20,7 +16,7 @@
 (defn nmf-bean 
   "Returns a porta.core/bean without methods and fields"
   [object]
-  (dissoc (bean object)
+  (dissoc (-bean object)
           :fields
           :declared-fields
           :methods
@@ -29,17 +25,17 @@
 (defn case-map [coll]
   (zipmap (map casing coll) coll))
 
-(defn -keys [object] (keys (bean object)))
+(defn -keys [object] (keys (-bean object)))
 
 (defn fq-name [object]
-  (-> (bean object)
+  (-> (-bean object)
       :name
       symbol))
 
 (defn characteristic-names [k object]
   (map (memfn getName)
        ((keyword k)
-        (bean object))))
+        (-bean object))))
 
 (defn restraints [coll-types]
   (let [args (interleave
@@ -66,7 +62,7 @@
 
 (defn- constructor-strings [object]
   (let [c (:declared-constructors
-           (bean object))
+           (-bean object))
         oc (filter #(-> % (.startsWith "public"))
                    (map (memfn toGenericString) 
                         c))]
@@ -210,7 +206,7 @@
            ~args)
           (.. ~object ~(-> method second symbol)))))))
         
-(defn methods [object]
+(defn -methods [object]
   (let [m (characteristic-names 
            :methods
            object)
@@ -221,7 +217,7 @@
      (vals cm))))
 
 (defn def-methods [object]
-  (map method-to-fn (methods object)))
+  (map method-to-fn (-methods object)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Fields
 
@@ -254,3 +250,9 @@
                (map #(str -symbol "/" %) v)))))
                
   
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Convenience
+
+(defn def-all [object]
+  (def-methods object)
+  (def-fields object)
+  (eval (abstraction object)))
