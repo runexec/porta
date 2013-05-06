@@ -26,7 +26,7 @@ git clone https://github.com/runexec/porta
 cd porta; lein install
 ```
 
-Add to your Clojure project
+Add to your Clojure project and import '''porta.core'''
 ```clojure
 [porta/porta "0.1.0-SNAPSHOT"]
 ```
@@ -35,42 +35,79 @@ Examples
 =====
 
 ```clojure
-;; Make a Clojure abstraction of a Java Class
-porta.core> (eval (abstraction java.util.Random))
-#'porta.core/-java-util-random
-;; Bind the class instance
-porta.core> (def random (let [seed 10] (-java-util-random seed)))
-#'porta.core/random
-;; Define Clojure methods related to the Java class
-porta.core> (def-methods java.util.Random)
-(#'porta.core/-next-int #'porta.core/-wait #'porta.core/-next-gaussian #'porta.core/-set-seed #'porta.core/-next-long #'porta.core/-notify-all #'porta.core/-equals #'porta.core/-next-float #'porta.core/-get-class #'porta.core/-notify #'porta.core/-to-string #'porta.core/-next-boolean #'porta.core/-next-bytes #'porta.core/-next-double #'porta.core/-hash-code)
-;; Call (.nextInt java.util.Random)
-porta.core> (-next-int random)
-254270492
-porta.core> (-next-int random)
--1408064384
-;; Call (.nextInt java.util.Random 10)
-porta.core> (-next-int random 10)
-7
-porta.core> (-next-int random 10)
-3
-porta.core> (clojure.pprint/pprint
-	     (abstraction java.util.Locale))
-(clojure.core/defn
- -java-util-locale
- ([arg0] (java.util.Locale. arg0))
- ([arg0 arg1] (java.util.Locale. arg0 arg1))
- ([arg0 arg1 arg2] (java.util.Locale. arg0 arg1 arg2)))
-nil
-porta.core> (eval (abstraction java.util.Locale))
-#'porta.core/-java-util-locale
-porta.core> (-java-util-locale "ENGLISH")
-#<Locale english>
-porta.core> (-java-util-locale "ENGLISH" "US")
-#<Locale english_US>
-porta.core> (-java-util-locale "ENGLISH" "US" "JP")
-#<Locale english_US_JP>
 
+;; View the Clojure abstraction of java.text.SimpleDateFormat
+porta.core> (clojure.pprint/pprint
+	     (abstraction java.text.SimpleDateFormat))
+(clojure.core/defn
+  -java-text-simpledateformat
+  ([arg0 arg1]
+     (clojure.core/assert
+      (clojure.core/some
+       clojure.core/identity
+       [(clojure.core/every?
+         clojure.core/true?
+         [(clojure.core/= java.lang.String (clojure.core/type arg0))
+          (clojure.core/=
+           java.text.DateFormatSymbols
+           (clojure.core/type arg1))])
+        (clojure.core/every?
+         clojure.core/true?
+         [(clojure.core/= java.lang.String (clojure.core/type arg0))
+          (clojure.core/= java.util.Locale (clojure.core/type arg1))])])
+      "Input Restraints")
+     (java.text.SimpleDateFormat. arg0 arg1))
+  ([arg0]
+     (clojure.core/assert
+      (clojure.core/every?
+       clojure.core/true?
+       [(clojure.core/= java.lang.String (clojure.core/type arg0))])
+      "Input Restraints")
+     (java.text.SimpleDateFormat. arg0))
+  ([] (java.text.SimpleDateFormat.)))
+nil
+
+;; Define the abstraction
+porta.core> (eval
+	     (abstraction java.text.SimpleDateFormat))
+#'porta.core/-java-text-simpledateformat
+
+;; Input restraints
+porta.core> (-java-text-simpledateformat 1)
+AssertionError Assert failed: Input Restraints
+-- snip error --
+
+porta.core> (-java-text-simpledateformat "h:mm a")
+#<SimpleDateFormat java.text.SimpleDateFormat@b4dc7db3>
+
+;; Restraints still apply with polymorphic methods
+porta.core> (-java-text-simpledateformat "h:mm:a"
+                                         (java.util.Locale. "ENGLISH"))
+#<SimpleDateFormat java.text.SimpleDateFormat@b4dc80d9>
+porta.core> (-java-text-simpledateformat "h:mm:a" 
+					 (java.text.DateFormatSymbols.
+					  (java.util.Locale. "ENGLISH")))
+#<SimpleDateFormat java.text.SimpleDateFormat@b4dc80d9>
+porta.core> (-java-text-simpledateformat "h:mm:a"  "h:mm:a")
+
+AssertionError Assert failed: Input Restraints
+-- snip error --
+
+;; Now lets make a Clojure abstraction for Class methods
+porta.core> (def sdf (-java-text-simpledateformat "h:mm:a"))
+#'porta.core/sdf
+porta.core> (take 3 (def-methods java.text.SimpleDateFormat))
+(#'porta.core/-get-date-format-symbols #'porta.core/-is-lenient #'porta.core/-get-calendar)
+
+;; Lisp-case converted (.getDateFormateSymbols object)
+porta.core> (-get-date-format-symbols sdf)
+#<DateFormatSymbols java.text.DateFormatSymbols@840177ab>
+
+;; Lisp-case converted (.toPattern object)
+porta.core> (-to-pattern sdf)
+"h:mm:a"
+
+;; Building Blocks
 porta.core>
 (doseq [_ (constructors java.util.Locale)] 
   (println _))

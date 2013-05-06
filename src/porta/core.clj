@@ -24,11 +24,6 @@
           :methods
           :declared-methods))
 
-(defn characteristic-names [k object]
-  (map (memfn getName)
-       ((keyword k)
-        (bean object))))
-
 (defn case-map [coll]
   (zipmap (map casing coll) coll))
 
@@ -38,6 +33,11 @@
   (-> (bean object)
       :name
       symbol))
+
+(defn characteristic-names [k object]
+  (map (memfn getName)
+       ((keyword k)
+        (bean object))))
 
 (defn fields [object] 
   (let [f (characteristic-names 
@@ -49,6 +49,55 @@
                   keyword)
              f)
         (zipmap f))))
+
+(defn restraints [coll-types]
+  (let [args (interleave
+              coll-types
+              (mapv #(->> % 
+                          (str "arg") 
+                          symbol)
+                    (-> coll-types
+                        count
+                        range)))
+        assertions (loop [ret []
+                          dropping args]
+                     (if-not (seq dropping)
+                       ret
+                       (let [[t a] (take 2 dropping)
+                             test `(= ~t (type ~a))]
+                         (recur
+                          (conj ret test)
+                          (nnext dropping)))))]
+      {:pre `(every? true? ~assertions)}))
+
+
+(defn build-restraints [object num-of-args]
+  (let [coll-args (map :args (constructors object))
+        to-build (group-by :count
+                           (map #(assoc {}
+                                   :count (count %)
+                                   :args %)
+                                coll-args))
+        get-restraints (fn [n]
+                         (apply merge-with
+                                #(list %1 %2)
+                                (map restraints
+                                     (map :args
+                                          (get to-build n)))))
+        restraints (get-restraints num-of-args)
+        msg "Input Restraints"]
+
+    (if-not (<= 2 (-> to-build
+                     (get num-of-args)
+                     count))
+      `(assert ~(:pre restraints) ~msg)
+      (let [_ (:pre restraints)]
+          ;; (some identity *) == (applyr or *) work around
+        `(assert
+          (some identity ~(vec _))
+          ~msg)))))
+                
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Constructors
 
@@ -89,15 +138,16 @@
                      (count
                       (filter #(= % _) args)))
                    counts))
-        new-args (for [[-type -count] counts]
-                   (->> (map #(str -type %) 
-                             (range -count))
-                        (map #(string/replace % ":" ""))
-                        (map #(string/replace % "." "-"))
-                        (map symbol)))]
+        new-args (flatten
+                  (for [[-type -count] counts]
+                    (->> (map #(str -type %) 
+                              (range -count))
+                         (map #(string/replace % ":" ""))
+                         (map #(string/replace % "." "-"))
+                         (map symbol))))]
     (eval
-     `(fn ~lisp-name [~@(flatten new-args)]
-         (~(symbol (str _ ".")) ~@(flatten new-args))))))
+     `(fn ~lisp-name [~@new-args]
+        (~(symbol (str _ ".")) ~@new-args)))))
 
 (defn constructors [object]
   (map constructor-string-to-params
@@ -124,13 +174,36 @@
                             (str "arg" x)))
                          (range %))
                        (map count multi))
-        multi-args (map #(cons % (list `(~(symbol
-                                           (str c "."))
-                                         ~@%)))
+        multi-args (map #(cons % (list
+                                  `(~(symbol (str c ".")) ~@%)))
                         arg-range)
-        multi-args (distinct multi-args)]
+        multi-args (distinct multi-args)
+        add-tests (filter #(-> % first (not= nil))
+                   (loop [ret []
+                         test (map #(build-restraints
+                                     object
+                                     (->  % first count))
+                                   multi-args)
+                         margs multi-args]
+                    (if-not (seq test)
+                      ret
+                      (let [method (first margs)
+                            args (first method)
+                            with-test (list args
+                                            (build-restraints
+                                             object
+                                             (count args))
+                                            (-> method rest flatten))
+                            with-test (if (seq args)
+                                        with-test
+                                        (list (first with-test)
+                                              (-> with-test nnext flatten)))]
+                        (recur
+                         (conj ret with-test)
+                         (rest test)
+                         (rest margs))))))]
        `(defn ~s
-          ~@multi-args)))
+          ~@add-tests)))
 
                     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Methods
@@ -160,4 +233,3 @@
 
 (defn def-methods [object]
   (map method-to-fn (methods object)))
-
