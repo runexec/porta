@@ -157,6 +157,20 @@ Call def-all = def-methods, def-fields, (evail (abstraction object))
 (def-all java.text.SimpleDateFormat)
 ```
 
+Make abstraction in a different ns
+
+```clojure
+user> (use 'porta.core)
+nil
+user> (create-ns 'example)
+#<Namespace example>
+user> (abstraction-to-ns 'example java.text.SimpleDateFormat)
+#'example/-java-text-simpledateformat
+#<Namespace user>
+user> (example/-java-text-simpledateformat)
+#<SimpleDateFormat java.text.SimpleDateFormat@a9427c06>
+```
+
 Building Blocks
 
 ```clojure

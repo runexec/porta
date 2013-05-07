@@ -256,3 +256,15 @@
   (def-methods object)
   (def-fields object)
   (eval (abstraction object)))
+
+
+(defn abstraction-to-ns
+  [ns-symbol object]
+  (let [currrent *ns*
+        target (or (find-ns ns-symbol)
+                   (create-ns ns-symbol))
+        abstraction (abstraction object)]
+    (set! *ns* target)
+    (println (eval abstraction))
+    (set! *ns* currrent)))
+
