@@ -46,9 +46,9 @@ If you don't have the casing dependency, check this out https://github.com/runex
 Examples
 =====
 
-```clojure
+View the Clojure abstraction of java.text.SimpleDateFormat
 
-;; View the Clojure abstraction of java.text.SimpleDateFormat
+```clojure
 porta.core> (clojure.pprint/pprint
 	     (abstraction java.text.SimpleDateFormat))
 (clojure.core/defn
@@ -78,21 +78,30 @@ porta.core> (clojure.pprint/pprint
      (java.text.SimpleDateFormat. arg0))
   ([] (java.text.SimpleDateFormat.)))
 nil
+```
 
-;; Define the abstraction
+Define the abstraction
+
+```clojure
 porta.core> (eval
 	     (abstraction java.text.SimpleDateFormat))
 #'porta.core/-java-text-simpledateformat
+```
 
-;; Input restraints
+Input restraints
+
+```clojure
 porta.core> (-java-text-simpledateformat 1)
 AssertionError Assert failed: Input Restraints
 -- snip error --
 
 porta.core> (-java-text-simpledateformat "h:mm a")
 #<SimpleDateFormat java.text.SimpleDateFormat@b4dc7db3>
+```
 
-;; Restraints still apply with polymorphic methods
+Restraints still apply with polymorphic methods
+
+```clojure
 porta.core> (-java-text-simpledateformat "h:mm:a"
                                          (java.util.Locale. "ENGLISH"))
 #<SimpleDateFormat java.text.SimpleDateFormat@b4dc80d9>
@@ -104,32 +113,51 @@ porta.core> (-java-text-simpledateformat "h:mm:a"  "h:mm:a")
 
 AssertionError Assert failed: Input Restraints
 -- snip error --
+```
 
-;; Now lets make a Clojure abstraction for Class methods
+Make a Clojure abstraction for Class methods
+
+```clojure
 porta.core> (def sdf (-java-text-simpledateformat "h:mm:a"))
 #'porta.core/sdf
 porta.core> (take 3 (def-methods java.text.SimpleDateFormat))
 (#'porta.core/-get-date-format-symbols #'porta.core/-is-lenient #'porta.core/-get-calendar)
+```
 
-;; Lisp-case converted (.getDateFormateSymbols object)
+Lisp-case converted (.getDateFormateSymbols object)
+
+```clojure
 porta.core> (-get-date-format-symbols sdf)
 #<DateFormatSymbols java.text.DateFormatSymbols@840177ab>
+```
 
-;; Lisp-case converted (.toPattern object)
+Lisp-case converted (.toPattern object)
+
+```clojure
 porta.core> (-to-pattern sdf)
 "h:mm:a"
+```
 
+Make a Clojure abstraction for the Class Fields
+
+```clojure
 porta.core> (take 3 (def-fields java.text.SimpleDateFormat))
 (#'porta.core/-month-field #'porta.core/-millisecond-field #'porta.core/-day-of-year-field)
 porta.core> -day-of-year-field
 10
 porta.core> -month-field
 2
+```
 
-;; call def-all = def-methods, def-fields, (evail (abstraction object))
+Call def-all = def-methods, def-fields, (evail (abstraction object))
+
+```clojure
 (def-all java.text.SimpleDateFormat)
+```
 
-;; Building Blocks
+Building Blocks
+
+```clojure
 porta.core> (clojure.pprint/pprint
 	     (fields java.text.SimpleDateFormat))
 {"-month-field" "MONTH_FIELD",
@@ -214,4 +242,4 @@ porta.core>
 #<Locale english_US_JP>
 nil
 porta.core> 
-
+```
